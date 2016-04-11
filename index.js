@@ -11,5 +11,8 @@ module.exports = {
   },
   backendReady: function(RED){
     console.log('backend ready');
+  },
+  loadServiceWorker: function(context){
+    console.log('loading service worker');
   }
 };
