@@ -1,6 +1,6 @@
 {
   "name": "pagenodes-extras",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "extension point for pagenodes",
   "main": "index.js",
   "scripts": {
