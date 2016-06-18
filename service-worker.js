@@ -1,13 +1,24 @@
+const _ = require('lodash');
+
+const CACHE_NAME = 'static-v1';
+
+const urlsToPrefetch = [
+  'j5-worker.bundle.js',
+  'function-worker.bundle.js',
+  'firebase-worker.bundle.js',
+  'https://api.github.com/gists/f6f272f8998fd98e59ff131359ccf5ac'
+];
+
+
+
 module.exports = {
-  loadServiceWorker: function(context, CACHE_NAME){
+  loadServiceWorker: function(context){
+
     console.log('loading service worker');
     context.addEventListener('install', function(event) {
       var now = Date.now();
 
-      var urlsToPrefetch = [
-        'j5-worker.bundle.js',
-        'function-worker.bundle.js'
-      ];
+
 
       // All of these logging statements should be visible via the "Inspect" interface
       // for the relevant SW accessed via chrome://serviceworker-internals
@@ -49,6 +60,71 @@ module.exports = {
         })
       );
     });
+
+
+    context.addEventListener('fetch', function(event) {
+
+      if(event.request.method !== 'GET'){
+        return;
+      }
+
+      const requestURL = new URL(event.request.url);
+      if (!_.includes(urlsToPrefetch, 1) && requestURL.origin != location.origin){
+        return;
+      }
+
+      var cacheRequest = event.request.clone();
+
+      var myCache;
+
+      event.respondWith(
+
+        caches.open(CACHE_NAME)
+          .then(function(cache){
+            myCache = cache;
+            return caches.match(cacheRequest);
+          })
+          .then(function(cacheResult){
+
+            // console.log('ok from cache', requestURL, cacheResult);
+            if(!cacheResult){
+              return fetch(event.request)
+              .then(function(response){
+
+                var responseToCache = response.clone();
+
+                myCache.put(event.request, responseToCache);
+                return response;
+              });
+            }
+
+            //cache ok, but async store the latest anyway.
+            fetch(event.request)
+              .then(function(response){
+                myCache.put(event.request, response);
+              });
+
+            return cacheResult;
+          })
+          .catch(function(err){
+            //not in cache
+            // console.log('not in cache', requestURL);
+            return fetch(event.request)
+              .then(function(response){
+
+                var responseToCache = response.clone();
+
+                myCache.put(event.request, responseToCache);
+                return response;
+              });
+          })
+
+      );
+
+    });
+
+
+
   },
   registerServiceWorker: function(){
     if ('serviceWorker' in navigator) {
