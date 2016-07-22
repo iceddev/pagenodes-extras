@@ -5,7 +5,6 @@ const CACHE_NAME = 'static-v1';
 const urlsToPrefetch = [
   'j5-worker.bundle.js',
   'function-worker.bundle.js',
-  'firebase-worker.bundle.js',
   'https://api.github.com/gists/f6f272f8998fd98e59ff131359ccf5ac'
 ];
 
