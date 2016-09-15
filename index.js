@@ -1,5 +1,7 @@
 module.exports = {
-
+  initUI: function(RED){
+    console.log('initing UI');
+  },
   loadClient: function(RED){
     console.log('loading client');
   },
